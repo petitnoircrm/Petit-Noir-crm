@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Petit Noir · CRM</title>
+<meta name="theme-color" content="#0d0a04">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Petit Noir">
+<link id="pwa-manifest" rel="manifest">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold: #c9a227; --gold2: #8b6914; --bg: #0d0a04; --bg2: #1a1208;
+    --bg3: #100c03; --border: #3a2a08; --text: #e8d5a0; --muted: #6a5525;
+    --red: #e07070; --green: #a0c090;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Playfair Display', Georgia, serif; min-height: 100vh; }
+  input, select, textarea { font-family: 'JetBrains Mono', monospace; background: var(--bg); border: 1px solid #4a3608; color: var(--text); border-radius: 8px; padding: 9px 12px; font-size: 13px; width: 100%; outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: var(--gold2); }
+  button { cursor: pointer; font-family: inherit; }
+  .label { color: #9a7d3a; font-size: 11px; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px; display: block; }
+
+  /* HEADER */
+  header { background: var(--bg3); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,#c9a227,#8b6914); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .logo-title { font-size: 18px; letter-spacing: 4px; color: var(--gold); font-weight: 700; }
+  .logo-sub { font-size: 10px; letter-spacing: 3px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .date-display { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  /* NAV */
+  nav { display: flex; border-bottom: 1px solid #2a1e08; background: var(--bg); padding: 0 24px; }
+  .nav-btn { padding: 12px 20px; background: transparent; border: none; color: var(--muted); border-bottom: 2px solid transparent; font-size: 13px; letter-spacing: 1px; font-family: 'Playfair Display', serif; display: flex; align-items: center; gap: 6px; transition: all .2s; }
+  .nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .nav-btn:hover { color: var(--text); }
+
+  /* MAIN */
+  main { padding: 24px; max-width: 900px; margin: 0 auto; }
+
+  /* CARDS / STATS */
+  .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; }
+  .stat-num { font-size: 28px; font-weight: 700; line-height: 1; }
+  .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; margin-top: 3px; }
+
+  /* SECTION */
+  .section { margin-bottom: 20px; }
+  .section-title { font-size: 12px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; margin-bottom: 10px; }
+
+  /* CLIENT ROW */
+  .client-row { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .client-name { color: var(--text); font-weight: 700; font-size: 14px; }
+  .client-meta { display: flex; gap: 14px; margin-top: 4px; flex-wrap: wrap; }
+  .client-meta span { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #8a6a30; display: flex; align-items: center; gap: 4px; }
+  .client-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-icon { background: transparent; border: 1px solid #2a1e08; border-radius: 6px; padding: 5px 7px; font-size: 13px; line-height: 1; transition: border-color .2s; }
+  .btn-icon:hover { border-color: var(--gold2); }
+  .btn-ver { background: transparent; color: #8a6a30; border: 1px solid #3a2a08; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+  .btn-ver:hover { border-color: var(--gold2); color: var(--gold); }
+
+  /* BADGE */
+  .badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; color: #fff; }
+
+  /* BUTTONS */
+  .btn-primary { background: var(--gold); color: #0d0a04; border: none; border-radius: 8px; padding: 9px 18px; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: opacity .2s; }
+  .btn-primary:hover { opacity: .88; }
+  .btn-secondary { background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; font-size: 13px; font-family: inherit; }
+  .btn-danger { background: #3a1208; color: var(--red); border: 1px solid #5a1e10; border-radius: 8px; padding: 8px 16px; font-size: 12px; }
+  .btn-green { background: #1a3020; color: var(--green); border: 1px solid #3a5030; border-radius: 6px; padding: 4px 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+
+  /* TOP BAR */
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .section-h2 { color: var(--gold); font-size: 16px; letter-spacing: 2px; font-family: 'JetBrains Mono', monospace; }
+
+  /* MODAL */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal { background: var(--bg2); border: 1px solid var(--gold2); border-radius: 12px; padding: 28px; max-width: 540px; width: 100%; max-height: 90vh; overflow-y: auto; }
+  .modal-title { color: var(--gold); font-size: 15px; font-weight: 700; margin-bottom: 20px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .full { grid-column: 1/-1; }
+  .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  /* DETAIL */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .detail-field { background: var(--bg); border: 1px solid #2a1e08; border-radius: 8px; padding: 10px 14px; }
+  .detail-val { color: var(--text); font-size: 13px; margin-top: 3px; }
+
+  /* ORDER */
+  .order-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 8px; }
+  .order-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .order-client { color: var(--gold); font-weight: 700; font-size: 14px; }
+  .order-meta { color: #8a6a30; font-size: 12px; margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+  .tag { background: var(--bg); border: 1px solid #4a3608; color: #b8972a; font-size: 11px; padding: 3px 9px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ITEM ROW */
+  .item-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .item-row select { flex: 2; }
+  .item-row input { width: 75px; flex: none; }
+  .btn-remove { background: transparent; border: none; color: var(--muted); font-size: 16px; padding: 2px 6px; }
+
+  /* HISTORY */
+  .history-item { background: var(--bg); border: 1px solid #2a1e08; border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; }
+
+  /* EMPTY */
+  .empty { color: #4a3608; font-size: 14px; font-style: italic; text-align: center; padding: 32px 0; }
+
+  /* ALERT BOX */
+  .alert { border-radius: 8px; padding: 10px 14px; font-size: 12px; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
+
+  textarea { resize: vertical; min-height: 65px; }
+
+  /* ALARM */
+  .alarm-box { background: #1a1208; border: 1px solid var(--gold2); border-radius: 10px; padding: 18px 20px; margin-top: 12px; }
+  .alarm-box-title { color: var(--gold); font-size: 13px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .alarm-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid #3a2a08; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; }
+  .alarm-item-info { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .alarm-item-date { color: var(--text); font-size: 13px; margin-bottom: 2px; }
+  .alarm-item-label { color: var(--muted); font-size: 11px; }
+  .btn-alarm { background: var(--gold); color: #0d0a04; border: none; border-radius: 7px; padding: 7px 14px; font-weight: 700; font-size: 12px; font-family: 'JetBrains Mono', monospace; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: opacity .2s; }
+  .btn-alarm:hover { opacity: .85; }
+  .btn-alarm:disabled { background: #4a3608; color: #6a5525; cursor: default; }
+  .alarm-set { color: var(--green); font-size: 11px; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; gap: 4px; }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .full { grid-column: 1; }
+    .detail-grid { grid-template-columns: 1fr; }
+    main { padding: 16px; }
+    nav { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🍫</div>
+    <div>
+      <div class="logo-title">PETIT NOIR</div>
+      <div class="logo-sub">CRM · GESTIÓN DE CLIENTES</div>
+    </div>
+  </div>
+  <div class="date-display" id="date-display"></div>
+</header>
+
+<nav>
+  <button class="nav-btn active" onclick="showTab('dashboard')" id="tab-dashboard">🏠 Dashboard</button>
+  <button class="nav-btn" onclick="showTab('clientes')" id="tab-clientes">👤 Clientes</button>
+  <button class="nav-btn" onclick="showTab('pedidos')" id="tab-pedidos">📦 Pedidos</button>
+</nav>
+
+<main id="main-content"></main>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" style="display:none" onclick="closeModal(event)">
+  <div class="modal" id="modal-content" onclick="event.stopPropagation()"></div>
+</div>
+
+<script>
+// ─── DATA & STORAGE ───────────────────────────────────────────────────────────
+const CATALOGO = [
+  // ── LÍNEA ALFAJORES ──
+  { id:"A01", nombre:"Caja x18 Alfajores — Choco/Blanco/Merengue/Mixtos 60g",  categoria:"Alfajores",   precio:14700 },
+  { id:"A02", nombre:"Caja x12 Alfajores — Choco/Blanco/Merengue/Mixtos 60g",  categoria:"Alfajores",   precio:10000 },
+  { id:"A03", nombre:"Caja x12 Alfajores Maicena 60g",                          categoria:"Alfajores",   precio:8600  },
+  { id:"A04", nombre:"Caja x12 Alfajores Frutos del Bosque 50g",                categoria:"Alfajores",   precio:9800  },
+  { id:"A05", nombre:"Caja x12 Alfajores Mousse de Chocolate 50g",              categoria:"Alfajores",   precio:11000 },
+  { id:"A06", nombre:"Caja x12 Conitos de Chocolate 44g",                       categoria:"Alfajores",   precio:8800  },
+  { id:"A07", nombre:"Caja x24 Conitos de Chocolate 44g",                       categoria:"Alfajores",   precio:17500 },
+  { id:"A08", nombre:"Caja x30 Alfajores Mini — Choco/Blanco/Mixtos 32g",       categoria:"Alfajores",   precio:12600 },
+  { id:"A09", nombre:"Caja x12 Cunitas — Alfajor Maicena mini x5u 34g",         categoria:"Alfajores",   precio:16000 },
+  { id:"A10", nombre:"Caja x12 Cunitas — Alfajor Choco mini x6u 32g",           categoria:"Alfajores",   precio:21400 },
+  { id:"A11", nombre:"Caja x12 Alfajores CORONA — DDL tapa merengue 60g",       categoria:"Alfajores",   precio:11000 },
+  { id:"A12", nombre:"Caja x12 Alfajores NUEZ — DDL y nuez c/baño blanco 65g",  categoria:"Alfajores",   precio:12600 },
+  { id:"A13", nombre:"Caja x12 Alfajores PISTACHO — Crema pistacho 55g",        categoria:"Alfajores",   precio:12000 },
+  { id:"A14", nombre:"Caja x12 Alfajores RON — DDL sabor Ron 60g",              categoria:"Alfajores",   precio:11800 },
+  { id:"A15", nombre:"Cunita Maicena (unitario)",                                categoria:"Alfajores",   precio:1400  },
+  { id:"A16", nombre:"Cunita Choco (unitario)",                                  categoria:"Alfajores",   precio:1780  },
+  // ── GALLETITAS LIMÓN ──
+  { id:"G01", nombre:"Caja x20 Galletitas mousse de limón 25g",                 categoria:"Galletitas",  precio:8000  },
+  { id:"G02", nombre:"Caja x20 Galletitas mousse limón c/baño chocolate 35g",   categoria:"Galletitas",  precio:11000 },
+  { id:"G03", nombre:"Caja x30 Galletitas mousse de limón a granel 25g",        categoria:"Galletitas",  precio:12000 },
+  { id:"G04", nombre:"Caja x30 Galletitas mousse limón c/baño choco a granel",  categoria:"Galletitas",  precio:16500 },
+  // ── RE ZARPADO ──
+  { id:"R01", nombre:"Alfajor Re Zarpado — Doble choco · DDL 70g",              categoria:"Re Zarpado",  precio:15000 },
+  // ── BLÍSTER 1500g ──
+  { id:"B01", nombre:"Blíster 1500g CHOCOLATE — Minis DDL c/baño choco x50",    categoria:"Blíster",     precio:16000 },
+  { id:"B02", nombre:"Blíster 1500g MERENGUE — Minis DDL c/tapa merengue x50",  categoria:"Blíster",     precio:19000 },
+  { id:"B03", nombre:"Blíster x50 Galletitas mousse de limón",                  categoria:"Blíster",     precio:16000 },
+  { id:"B04", nombre:"Blíster x40 Galletitas mousse limón c/baño chocolate",    categoria:"Blíster",     precio:18700 },
+  // ── BLÍSTER 2000g ──
+  { id:"B05", nombre:"Blíster 2000g CHOCOLATE — Minis DDL c/baño choco ~66u",   categoria:"Blíster 2kg", precio:21000 },
+  { id:"B06", nombre:"Blíster 2000g CHOCO c/PRALINE — Minis DDL ~66u",          categoria:"Blíster 2kg", precio:21000 },
+  { id:"B07", nombre:"Blíster 2000g BLANCO c/PRALINE — Minis DDL ~60u",         categoria:"Blíster 2kg", precio:21000 },
+  { id:"B08", nombre:"Blíster 2000g MAICENA — DDL y coco rallado ~66u",         categoria:"Blíster 2kg", precio:19500 },
+  { id:"B09", nombre:"Blíster 2000g MERENGUE — Minis DDL c/tapa merengue ~66u", categoria:"Blíster 2kg", precio:24000 },
+];
+const PRODUCTOS = CATALOGO.map(p => p.nombre);
+const TIPOS = ["kiosco","dietética","cafetería","mayorista","distribuidor","otro"];
+const ESTADOS = ["Pendiente","Confirmado","Enviado","Entregado","Cancelado"];
+const TIPO_COLORS = { kiosco:"#b8860b", dietética:"#3a7d44", cafetería:"#8b3a3a", mayorista:"#2a5298", distribuidor:"#6b3fa0", otro:"#555" };
+
+function loadData(key, fallback) {
+  try { const d = localStorage.getItem(key); return d ? JSON.parse(d) : fallback; }
+  catch { return fallback; }
+}
+function saveData(key, data) {
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
+}
+
+const SEED_CLIENTS = [
+  { id:"c1", nombre:"Kiosco Don Jorge", tipo:"kiosco", ciudad:"Buenos Aires", tel:"11-4523-8901", notas:"Pide maicena y clásicos", proxContacto:"", ultimoPedido:"2025-05-10" },
+  { id:"c2", nombre:"Dietética NaturVida", tipo:"dietética", ciudad:"Córdoba", tel:"351-4112-233", notas:"Interesa línea blíster", proxContacto:"", ultimoPedido:"2025-04-28" },
+  { id:"c3", nombre:"Cafetería El Molino", tipo:"cafetería", ciudad:"Rosario", tel:"341-5500-712", notas:"Consume pistacho y frutos del bosque", proxContacto:"", ultimoPedido:"" },
+];
+
+let clients = loadData("pn_clients", SEED_CLIENTS);
+let orders  = loadData("pn_orders", []);
+let currentTab = "dashboard";
+
+function persist() {
+  saveData("pn_clients", clients);
+  saveData("pn_orders", orders);
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+const uid = () => Math.random().toString(36).slice(2,10);
+const today = () => new Date().toISOString().split("T")[0];
+
+function fmtDate(d) {
+  if (!d) return "—";
+  const dt = new Date(d + "T00:00:00");
+  return dt.toLocaleDateString("es-AR", { day:"2-digit", month:"short", year:"numeric" });
+}
+function daysUntil(d) {
+  if (!d) return null;
+  return Math.ceil((new Date(d+"T00:00:00") - new Date()) / 86400000);
+}
+function badge(tipo) {
+  return `<span class="badge" style="background:${TIPO_COLORS[tipo]||'#555'}">${tipo.toUpperCase()}</span>`;
+}
+function daysLabel(c) {
+  const d = daysUntil(c.proxContacto);
+  if (d === null) return '<span style="color:#5a4520">Sin fecha</span>';
+  if (d <= 0) return '<span style="color:#e07070">📞 Contactar hoy</span>';
+  if (d <= 3) return `<span style="color:#e0a040">En ${d} días</span>`;
+  return `<span style="color:#a0c090">En ${d} días</span>`;
+}
+
+function clientOrders(id) { return orders.filter(o => o.clientId === id); }
+
+// ─── DATE DISPLAY ─────────────────────────────────────────────────────────────
+document.getElementById("date-display").textContent =
+  new Date().toLocaleDateString("es-AR", { weekday:"long", day:"numeric", month:"long" });
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function showTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + tab).classList.add("active");
+  // Update tab labels
+  document.getElementById("tab-clientes").textContent = `👤 Clientes (${clients.length})`;
+  document.getElementById("tab-pedidos").textContent = `📦 Pedidos (${orders.length})`;
+  renderTab();
+}
+
+function renderTab() {
+  const el = document.getElementById("main-content");
+  if (currentTab === "dashboard") el.innerHTML = renderDashboard();
+  else if (currentTab === "clientes") el.innerHTML = renderClientes();
+  else if (currentTab === "pedidos") el.innerHTML = renderPedidos();
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const hoy = clients.filter(c => { const d = daysUntil(c.proxContacto); return d !== null && d <= 0; });
+  const prox = clients.filter(c => { const d = daysUntil(c.proxContacto); return d !== null && d > 0 && d <= 7; })
+                      .sort((a,b) => a.proxContacto.localeCompare(b.proxContacto));
+  const sinFecha = clients.filter(c => !c.proxContacto);
+
+  let html = `
+    <div class="stats">
+      <div class="stat-card">
+        <span style="font-size:24px">👥</span>
+        <div><div class="stat-num" style="color:var(--gold)">${clients.length}</div><div class="stat-label">CLIENTES TOTALES</div></div>
+      </div>
+      <div class="stat-card">
+        <span style="font-size:24px">📦</span>
+        <div><div class="stat-num" style="color:var(--green)">${orders.length}</div><div class="stat-label">PEDIDOS REGISTRADOS</div></div>
+      </div>
+      <div class="stat-card">
+        <span style="font-size:24px">🔔</span>
+        <div><div class="stat-num" style="color:${hoy.length > 0 ? '#e07070':'#6a5525'}">${hoy.length}</div><div class="stat-label">LLAMAR HOY</div></div>
+      </div>
+    </div>`;
+
+  if (hoy.length) {
+    html += `<div class="section"><div class="section-title" style="color:#e07070">🔴 LLAMAR HOY</div>`;
+    hoy.forEach(c => { html += clientRowHTML(c); });
+    html += `</div>`;
+  }
+  if (prox.length) {
+    html += `<div class="section"><div class="section-title" style="color:var(--gold)">📅 PRÓXIMOS 7 DÍAS</div>`;
+    prox.forEach(c => { html += clientRowHTML(c); });
+    html += `</div>`;
+  }
+  if (sinFecha.length) {
+    html += `<div class="section"><div class="section-title" style="color:#8b6914">⚠️ SIN PRÓXIMA FECHA DE CONTACTO</div>`;
+    sinFecha.forEach(c => { html += clientRowHTML(c); });
+    html += `</div>`;
+  }
+  if (!hoy.length && !prox.length && !sinFecha.length) {
+    html += `<div class="empty">✅ Todo al día — no hay alertas</div>`;
+  }
+  return html;
+}
+
+// ─── CLIENTES ─────────────────────────────────────────────────────────────────
+function renderClientes() {
+  let html = `<div class="top-bar">
+    <div class="section-h2">CLIENTES</div>
+    <button class="btn-primary" onclick="openClientForm()">＋ Nuevo cliente</button>
+  </div>`;
+  if (!clients.length) return html + `<div class="empty">No hay clientes todavía</div>`;
+  clients.forEach(c => { html += clientRowHTML(c, true); });
+  return html;
+}
+
+function clientRowHTML(c, expanded) {
+  const co = clientOrders(c.id).length;
+  return `
+    <div class="client-row">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="client-name">${esc(c.nombre)}</span>
+          ${badge(c.tipo)}
+          ${expanded ? `<span style="color:var(--muted);font-size:12px">${esc(c.ciudad)}</span>` : ""}
+        </div>
+        <div class="client-meta">
+          ${c.tel ? `<span>📞 ${esc(c.tel)}</span>` : ""}
+          <span>🗓 ${daysLabel(c)}</span>
+          <span style="color:#5a4520">${co} pedido${co !== 1 ? "s" : ""}</span>
+        </div>
+      </div>
+      <div class="client-actions">
+        ${c.proxContacto ? `<button class="btn-icon" title="Alarmas" onclick="showAlarmModal(clients.find(x=>x.id==='${c.id}'))">🔔</button>` : ""}
+        <button class="btn-icon" title="Nuevo pedido" onclick="openOrderForm(null,'${c.id}')">📦</button>
+        <button class="btn-icon" title="Editar" onclick="openClientForm('${c.id}')">✏️</button>
+        <button class="btn-ver" onclick="openDetail('${c.id}')">VER</button>
+      </div>
+    </div>`;
+}
+
+// ─── PEDIDOS ──────────────────────────────────────────────────────────────────
+function renderPedidos() {
+  let html = `<div class="top-bar">
+    <div class="section-h2">PEDIDOS</div>
+    <button class="btn-primary" onclick="openOrderForm()">＋ Nuevo pedido</button>
+  </div>`;
+  if (!orders.length) return html + `<div class="empty">No hay pedidos registrados</div>`;
+  const sorted = [...orders].sort((a,b) => b.fecha.localeCompare(a.fecha));
+  sorted.forEach(o => {
+    const c = clients.find(x => x.id === o.clientId);
+    const tags = (o.items||[]).map(it => `<span class="tag">${esc(it.producto)} ×${it.cantidad}</span>`).join("");
+    html += `
+      <div class="order-card">
+        <div class="order-top">
+          <div>
+            <div class="order-client">${c ? esc(c.nombre) : "Cliente eliminado"}</div>
+            <div class="order-meta">${fmtDate(o.fecha)} · ${o.estado}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn-icon" onclick="openOrderForm('${o.id}')">✏️</button>
+            <button class="btn-icon" onclick="deleteOrder('${o.id}')">🗑️</button>
+          </div>
+        </div>
+        <div class="tags">${tags}</div>
+        ${o.total ? `<div style="color:var(--green);font-size:13px;font-family:'JetBrains Mono',monospace;margin-top:6px">Total: $${Number(o.total).toLocaleString("es-AR")}</div>` : ""}
+        ${o.notas ? `<div style="color:var(--muted);font-size:12px;font-style:italic;margin-top:6px">"${esc(o.notas)}"</div>` : ""}
+      </div>`;
+  });
+  return html;
+}
+
+// ─── MODAL HELPERS ────────────────────────────────────────────────────────────
+function openModal(html) {
+  document.getElementById("modal-content").innerHTML = html;
+  document.getElementById("overlay").style.display = "flex";
+}
+function closeModal(e) {
+  if (!e || e.target === document.getElementById("overlay")) {
+    document.getElementById("overlay").style.display = "none";
+  }
+}
+
+// ─── CLIENT DETAIL ────────────────────────────────────────────────────────────
+function openDetail(id) {
+  const c = clients.find(x => x.id === id);
+  if (!c) return;
+  const co = clientOrders(id);
+  const sorted = [...co].sort((a,b) => b.fecha.localeCompare(a.fecha));
+  let histHTML = co.length ? sorted.map(o => `
+    <div class="history-item">
+      <div style="display:flex;justify-content:space-between">
+        <span style="color:#8a6a30;font-size:12px;font-family:'JetBrains Mono',monospace">${fmtDate(o.fecha)}</span>
+        <span style="color:#6a8560;font-size:11px;font-family:'JetBrains Mono',monospace">${o.estado}</span>
+      </div>
+      <div class="tags" style="margin-top:6px">${(o.items||[]).map(it=>`<span class="tag">${esc(it.producto)} ×${it.cantidad}</span>`).join("")}</div>
+      ${o.total ? `<div style="color:var(--green);font-size:12px;font-family:'JetBrains Mono',monospace;margin-top:4px">$${Number(o.total).toLocaleString("es-AR")}</div>` : ""}
+    </div>`).join("") : `<div style="color:#4a3608;font-size:13px;font-style:italic">Sin pedidos registrados</div>`;
+
+  openModal(`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+      <div>
+        <div style="color:var(--gold);font-size:18px;font-weight:700">${esc(c.nombre)}</div>
+        <div style="display:flex;gap:8px;margin-top:4px;align-items:center">${badge(c.tipo)}<span style="color:var(--muted);font-size:12px">${esc(c.ciudad)}</span></div>
+      </div>
+      <button onclick="closeModal()" style="background:transparent;border:none;color:var(--muted);font-size:20px">✕</button>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-field"><span class="label">TELÉFONO</span><div class="detail-val">${esc(c.tel)||"—"}</div></div>
+      <div class="detail-field"><span class="label">CIUDAD</span><div class="detail-val">${esc(c.ciudad)||"—"}</div></div>
+      <div class="detail-field"><span class="label">ÚLTIMO PEDIDO</span><div class="detail-val">${fmtDate(c.ultimoPedido)}</div></div>
+      <div class="detail-field"><span class="label">PRÓXIMO CONTACTO</span><div class="detail-val">${fmtDate(c.proxContacto)}</div></div>
+    </div>
+    ${c.notas ? `<div class="detail-field" style="margin-bottom:16px"><span class="label">NOTAS</span><div style="color:#b8972a;font-size:13px;margin-top:3px;font-style:italic">"${esc(c.notas)}"</div></div>` : ""}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="label" style="margin:0">HISTORIAL DE PEDIDOS (${co.length})</span>
+      <button class="btn-green" onclick="closeModal();openOrderForm(null,'${id}')">+ PEDIDO</button>
+    </div>
+    ${histHTML}
+    <div class="form-actions" style="margin-top:16px">
+      <button class="btn-danger" onclick="deleteClient('${id}')">Eliminar cliente</button>
+      <button class="btn-primary" onclick="closeModal();openClientForm('${id}')">✏️ Editar</button>
+    </div>
+  `);
+}
+
+// ─── CLIENT FORM ──────────────────────────────────────────────────────────────
+function openClientForm(id) {
+  const c = id ? clients.find(x => x.id === id) : null;
+  const v = c || { id:"", nombre:"", tipo:"kiosco", ciudad:"", tel:"", notas:"", proxContacto:"", ultimoPedido:"" };
+  openModal(`
+    <div class="modal-title">${c ? "Editar cliente" : "Nuevo cliente"}</div>
+    <div class="form-grid">
+      <div class="full"><label class="label">NOMBRE / NEGOCIO *</label><input id="cf-nombre" value="${esc(v.nombre)}" placeholder="Ej: Kiosco Don Jorge"></div>
+      <div><label class="label">TIPO</label><select id="cf-tipo">${TIPOS.map(t=>`<option value="${t}" ${v.tipo===t?"selected":""}>${t}</option>`).join("")}</select></div>
+      <div><label class="label">CIUDAD</label><input id="cf-ciudad" value="${esc(v.ciudad)}" placeholder="Ej: Buenos Aires"></div>
+      <div><label class="label">TELÉFONO / WHATSAPP</label><input id="cf-tel" value="${esc(v.tel)}" placeholder="11-xxxx-xxxx"></div>
+      <div><label class="label">PRÓXIMO CONTACTO</label><input id="cf-prox" type="date" value="${v.proxContacto}"></div>
+      <div class="full"><label class="label">NOTAS</label><textarea id="cf-notas" placeholder="Productos que le interesan, observaciones...">${esc(v.notas)}</textarea></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveClient('${v.id}')">Guardar</button>
+    </div>
+  `);
+}
+
+function saveClient(id) {
+  const nombre = document.getElementById("cf-nombre").value.trim();
+  if (!nombre) { alert("El nombre es obligatorio"); return; }
+  const prevProx = id ? (clients.find(c=>c.id===id)||{}).proxContacto || "" : "";
+  const data = {
+    id: id || uid(),
+    nombre,
+    tipo: document.getElementById("cf-tipo").value,
+    ciudad: document.getElementById("cf-ciudad").value.trim(),
+    tel: document.getElementById("cf-tel").value.trim(),
+    proxContacto: document.getElementById("cf-prox").value,
+    notas: document.getElementById("cf-notas").value.trim(),
+    ultimoPedido: id ? (clients.find(c=>c.id===id)||{}).ultimoPedido || "" : ""
+  };
+  if (id) { clients = clients.map(c => c.id === id ? data : c); }
+  else { clients.push(data); }
+  persist();
+  // Si tiene fecha de próximo contacto y cambió (o es nuevo), ofrecer alarmas
+  if (data.proxContacto && data.proxContacto !== prevProx) {
+    showAlarmModal(data);
+  } else {
+    closeModal();
+    showTab(currentTab);
+  }
+}
+
+// ─── ALARM MODAL ──────────────────────────────────────────────────────────────
+function showAlarmModal(client) {
+  const fecha = new Date(client.proxContacto + "T09:00:00");
+  const fechaAntes = new Date(client.proxContacto + "T09:00:00");
+  fechaAntes.setDate(fechaAntes.getDate() - 1);
+
+  const fmtFull = (d) => d.toLocaleDateString("es-AR", { weekday:"long", day:"numeric", month:"long" });
+
+  const alarms = [
+    { key: "antes", label: "Recordatorio día anterior", fecha: fechaAntes, emoji: "⏰" },
+    { key: "dia",   label: "Día del contacto — 9 AM",  fecha: fecha,       emoji: "📞" },
+  ];
+
+  // Cargar cuáles ya están seteadas
+  const setKeys = JSON.parse(localStorage.getItem("pn_alarms_" + client.id) || "[]");
+
+  openModal(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <div class="modal-title" style="margin:0">✅ Cliente guardado</div>
+      <button onclick="closeModal();showTab(currentTab)" style="background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div style="color:#8a6a30;font-size:12px;font-family:'JetBrains Mono',monospace;margin-bottom:16px">${esc(client.nombre)} · Próximo contacto: <span style="color:var(--gold)">${fmtFull(fecha)}</span></div>
+    <div class="alarm-box">
+      <div class="alarm-box-title">🔔 Alarmas para este contacto</div>
+      ${alarms.map(a => {
+        const set = setKeys.includes(a.key);
+        return `
+        <div class="alarm-item" id="alarm-item-${a.key}">
+          <div class="alarm-item-info">
+            <div class="alarm-item-date">${a.emoji} ${fmtFull(a.fecha)}</div>
+            <div class="alarm-item-label">${a.label}</div>
+          </div>
+          ${set
+            ? `<span class="alarm-set">✓ Seteada</span>`
+            : `<button class="btn-alarm" id="btn-alarm-${a.key}" onclick="setAlarm('${client.id}','${a.key}','${client.nombre}','${a.fecha.toISOString()}','${a.label}',this)">⏰ Crear</button>`
+          }
+        </div>`;
+      }).join("")}
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:16px">
+      <button class="btn-secondary" onclick="closeModal();showTab(currentTab)">Listo</button>
+    </div>
+  `);
+}
+
+function setAlarm(clientId, key, nombre, isoDate, label, btn) {
+  // Marcar visualmente
+  btn.disabled = true;
+  btn.textContent = "⏳ Creando...";
+
+  // Guardar en localStorage que esta alarma fue seteada
+  const storageKey = "pn_alarms_" + clientId;
+  const setKeys = JSON.parse(localStorage.getItem(storageKey) || "[]");
+  if (!setKeys.includes(key)) setKeys.push(key);
+  localStorage.setItem(storageKey, JSON.stringify(setKeys));
+
+  // Reemplazar botón por check
+  const item = document.getElementById("alarm-item-" + key);
+  if (item) {
+    item.querySelector(".btn-alarm") && (item.querySelector(".btn-alarm").outerHTML = `<span class="alarm-set">✓ Seteada</span>`);
+  }
+
+  // Trigger nativo — usamos el protocolo intent de Android para abrir alarma
+  // Fallback: deeplink al reloj
+  const d = new Date(isoDate);
+  const h = d.getHours();
+  const m = d.getMinutes();
+  const msg = encodeURIComponent("Petit Noir · " + nombre + " · " + label);
+
+  // Intent Android (funciona en Chrome Android)
+  const intent = `intent://alarm#Intent;scheme=android-app;package=com.google.android.deskclock;S.android.intent.extra.alarm.MESSAGE=${msg};i.android.intent.extra.alarm.HOUR=${h};i.android.intent.extra.alarm.MINUTES=${m};B.android.intent.extra.alarm.SKIP_UI=false;end`;
+
+  // Intentar abrir reloj nativo
+  const link = document.createElement("a");
+  link.href = intent;
+  link.click();
+}
+
+function deleteClient(id) {
+  if (!confirm("¿Eliminar este cliente y todos sus pedidos?")) return;
+  clients = clients.filter(c => c.id !== id);
+  orders = orders.filter(o => o.clientId !== id);
+  persist();
+  closeModal();
+  showTab(currentTab === "dashboard" ? "dashboard" : "clientes");
+}
+
+// ─── ORDER FORM ───────────────────────────────────────────────────────────────
+let orderItems = [];
+
+function getPrecio(nombreProducto) {
+  const p = CATALOGO.find(x => x.nombre === nombreProducto);
+  return p ? p.precio : 0;
+}
+
+function calcTotal() {
+  return orderItems.reduce((sum, it) => sum + (getPrecio(it.producto) * (it.cantidad||1)), 0);
+}
+
+function updateTotal() {
+  const el = document.getElementById("of-total");
+  if (el) el.value = calcTotal();
+}
+
+// Agrupar catálogo por categoría para el select
+function buildProductSelect(selectedNombre) {
+  const cats = {};
+  CATALOGO.forEach(p => {
+    if (!cats[p.categoria]) cats[p.categoria] = [];
+    cats[p.categoria].push(p);
+  });
+  return Object.entries(cats).map(([cat, prods]) =>
+    `<optgroup label="── ${cat} ──">${prods.map(p =>
+      `<option value="${p.nombre}" ${p.nombre===selectedNombre?"selected":""}>${p.nombre} · $${p.precio.toLocaleString("es-AR")}</option>`
+    ).join("")}</optgroup>`
+  ).join("");
+}
+
+function openOrderForm(oid, preClientId) {
+  const o = oid ? orders.find(x => x.id === oid) : null;
+  orderItems = o ? [...o.items] : [{ producto: CATALOGO[0].nombre, cantidad: 1 }];
+  const clientOptions = clients.map(c =>
+    `<option value="${c.id}" ${(o?.clientId===c.id||preClientId===c.id)?"selected":""}>${esc(c.nombre)}</option>`
+  ).join("");
+
+  openModal(`
+    <div class="modal-title">${o ? "Editar pedido" : "Nuevo pedido"}</div>
+    <div class="form-grid">
+      <div class="full"><label class="label">CLIENTE *</label>
+        <select id="of-client"><option value="">— Seleccionar —</option>${clientOptions}</select></div>
+      <div><label class="label">FECHA</label><input id="of-fecha" type="date" value="${o?.fecha||today()}"></div>
+      <div><label class="label">ESTADO</label><select id="of-estado">${ESTADOS.map(s=>`<option ${o?.estado===s?"selected":""}>${s}</option>`).join("")}</select></div>
+      <div class="full">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <label class="label" style="margin:0">PRODUCTOS</label>
+          <button class="btn-green" onclick="addOrderItem()">+ agregar</button>
+        </div>
+        <div id="items-container"></div>
+      </div>
+      <div class="full" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center">
+        <span class="label" style="margin:0">TOTAL DEL PEDIDO</span>
+        <span id="of-total-display" style="font-size:20px;font-weight:700;color:var(--gold);font-family:'JetBrains Mono',monospace">$0</span>
+        <input id="of-total" type="hidden" value="${o?.total||0}">
+      </div>
+      <div class="full"><label class="label">NOTAS</label><input id="of-notas" value="${esc(o?.notas||"")}" placeholder="Observaciones..."></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveOrder('${o?.id||""}')">Guardar pedido</button>
+    </div>
+  `);
+  renderOrderItems();
+}
+
+function renderOrderItems() {
+  const el = document.getElementById("items-container");
+  if (!el) return;
+  el.innerHTML = orderItems.map((it,i) => {
+    const precio = getPrecio(it.producto);
+    const subtotal = precio * (it.cantidad||1);
+    return `
+    <div class="item-row" style="flex-direction:column;align-items:stretch;gap:6px;margin-bottom:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px">
+      <div style="display:flex;gap:6px;align-items:center">
+        <select style="flex:1" onchange="orderItems[${i}].producto=this.value;renderOrderItems()">${buildProductSelect(it.producto)}</select>
+        ${orderItems.length > 1 ? `<button class="btn-remove" onclick="removeOrderItem(${i})">✕</button>` : ""}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="number" min="1" value="${it.cantidad}" style="width:70px" onchange="orderItems[${i}].cantidad=Number(this.value)||1;renderOrderItems()">
+        <span style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace">× $${precio.toLocaleString("es-AR")} = <span style="color:var(--gold);font-weight:700">$${subtotal.toLocaleString("es-AR")}</span></span>
+      </div>
+    </div>`;
+  }).join("");
+  // Actualizar total
+  const total = calcTotal();
+  const disp = document.getElementById("of-total-display");
+  const inp = document.getElementById("of-total");
+  if (disp) disp.textContent = "$" + total.toLocaleString("es-AR");
+  if (inp) inp.value = total;
+}
+
+function addOrderItem() {
+  orderItems.push({ producto: CATALOGO[0].nombre, cantidad: 1 });
+  renderOrderItems();
+}
+function removeOrderItem(i) {
+  orderItems.splice(i, 1);
+  renderOrderItems();
+}
+
+function saveOrder(oid) {
+  const clientId = document.getElementById("of-client").value;
+  if (!clientId) { alert("Seleccioná un cliente"); return; }
+  const data = {
+    id: oid || uid(),
+    clientId,
+    fecha: document.getElementById("of-fecha").value,
+    estado: document.getElementById("of-estado").value,
+    items: [...orderItems],
+    total: document.getElementById("of-total").value ? Number(document.getElementById("of-total").value) : null,
+    notas: document.getElementById("of-notas").value.trim()
+  };
+  if (oid) { orders = orders.map(o => o.id === oid ? data : o); }
+  else { orders.push(data); }
+  // Update ultimoPedido
+  const co = orders.filter(o => o.clientId === clientId).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  clients = clients.map(c => c.id === clientId ? { ...c, ultimoPedido: co[0]?.fecha || c.ultimoPedido } : c);
+  persist();
+  closeModal();
+  showTab(currentTab);
+}
+
+function deleteOrder(id) {
+  if (!confirm("¿Eliminar este pedido?")) return;
+  orders = orders.filter(o => o.id !== id);
+  persist();
+  showTab(currentTab);
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function esc(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+showTab("dashboard");
+
+// ─── PWA SETUP ────────────────────────────────────────────────────────────────
+(function initPWA() {
+  // 1. Generar ícono 192x192 y 512x512 con canvas
+  function makeIcon(size) {
+    const c = document.createElement("canvas");
+    c.width = size; c.height = size;
+    const ctx = c.getContext("2d");
+    // Fondo negro
+    ctx.fillStyle = "#0d0a04";
+    ctx.fillRect(0, 0, size, size);
+    // Círculo dorado
+    const r = size * 0.42;
+    const cx = size / 2, cy = size / 2;
+    const grad = ctx.createRadialGradient(cx - r*0.2, cy - r*0.2, r*0.1, cx, cy, r);
+    grad.addColorStop(0, "#e8c040");
+    grad.addColorStop(1, "#8b6914");
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    // Letra P
+    ctx.fillStyle = "#0d0a04";
+    ctx.font = `bold ${size * 0.42}px Georgia, serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("PN", cx, cy + size * 0.02);
+    return c.toDataURL("image/png");
+  }
+
+  const icon192 = makeIcon(192);
+  const icon512 = makeIcon(512);
+
+  // 2. Crear manifest como blob URL
+  const manifest = {
+    name: "Petit Noir CRM",
+    short_name: "PN CRM",
+    description: "CRM de ventas Petit Noir Alfajores",
+    start_url: "./",
+    display: "standalone",
+    background_color: "#0d0a04",
+    theme_color: "#0d0a04",
+    orientation: "portrait",
+    lang: "es",
+    icons: [
+      { src: icon192, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+      { src: icon512, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+  document.getElementById("pwa-manifest").href = URL.createObjectURL(blob);
+
+  // Apple touch icon
+  const appleLink = document.createElement("link");
+  appleLink.rel = "apple-touch-icon";
+  appleLink.href = icon192;
+  document.head.appendChild(appleLink);
+
+  // 3. Registrar Service Worker inline (cache-first para offline)
+  if ("serviceWorker" in navigator) {
+    const swCode = `
+const CACHE = "pn-crm-v1";
+const ASSETS = ["./"]; // cachea el propio HTML
+self.addEventListener("install", e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(()=>{}));
+  self.skipWaiting();
+});
+self.addEventListener("activate", e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+  self.clients.claim();
+});
+self.addEventListener("fetch", e => {
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).catch(()=>r)));
+});
+    `;
+    const swBlob = new Blob([swCode], { type: "application/javascript" });
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl, { scope: "./" })
+      .then(() => console.log("SW registrado ✓"))
+      .catch(e => console.log("SW solo disponible en HTTPS:", e.message));
+  }
+
+  // 4. Banner "Instalar app" 
+  let deferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    showInstallBanner();
+  });
+
+  function showInstallBanner() {
+    if (document.getElementById("install-banner")) return;
+    const banner = document.createElement("div");
+    banner.id = "install-banner";
+    banner.style.cssText = `
+      position:fixed;bottom:0;left:0;right:0;z-index:9999;
+      background:#1a1208;border-top:2px solid #c9a227;
+      padding:14px 20px;display:flex;align-items:center;justify-content:space-between;
+      font-family:'JetBrains Mono',monospace;font-size:13px;color:#e8d5a0;
+    `;
+    banner.innerHTML = `
+      <div>
+        <div style="color:#c9a227;font-weight:700;margin-bottom:2px">📲 Instalar Petit Noir CRM</div>
+        <div style="font-size:11px;color:#6a5525">Agregá la app a tu pantalla de inicio</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="document.getElementById('install-banner').remove()" style="background:transparent;border:1px solid #4a3608;color:#6a5525;border-radius:7px;padding:8px 12px;font-size:12px;font-family:inherit">Ahora no</button>
+        <button id="btn-install" style="background:#c9a227;color:#0d0a04;border:none;border-radius:7px;padding:8px 14px;font-weight:700;font-size:12px;font-family:inherit">Instalar</button>
+      </div>
+    `;
+    document.body.appendChild(banner);
+    document.getElementById("btn-install").addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      banner.remove();
+    });
+  }
+})();
+</script>
+</body>
+</html>
